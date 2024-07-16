@@ -57,13 +57,26 @@ export default function Item() {
         fetchAccount().catch(console.error);
     }, [])
 
-    const onWantToBuy = () => {
-        setOnStatusBuy(true)
-        setItem({ itemName: "cars", amount: 0.0001 });
+    const onWantToBuy = async () => {
+        const accounts = await web3.eth.getAccounts();
+        console.log(accounts[0])
+        try {
+            await contract.methods.iWantToBuy("cars", 100000000000000).send({ from: accounts[0] });
+            setOnStatusBuy(true)
+            setItem({ itemName: "cars", amount: 0.0001 });
+        } catch (err) {
+            console.log("error", err)
+        }
+
     }
 
-    const onDeposit = () => {
-
+    const onDeposit = async () => {
+        const accounts = await web3.eth.getAccounts();
+        try {
+            await contract.methods.deposit().send({ from: accounts[0] });
+        } catch (err) {
+            console.log("error", err)
+        }
     }
 
     const RenderLimbo = () => {

@@ -69,7 +69,7 @@ export default function Header(args: any) {
     const disconnectWallet = async () => {
         if (typeof window !== "undefined" && window.ethereum) {
             window.ethereum.request({
-                method: "wallet_requestPermissions",
+                method: "wallet_revokePermissions",
                 params: [{
                     eth_accounts: {}
                 }]
