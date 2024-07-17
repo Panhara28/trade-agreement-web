@@ -5,77 +5,90 @@ import { Button, Card, CardBody, CardLink, CardSubtitle, CardText, CardTitle, Co
 import Web3 from "web3";
 import contractABI from '../abi/index.json';
 
-export default function Item() {
+type Props = {
+    sellerAddress?: string;
+    buyerAccepted?: boolean;
+    depositMade?: boolean;
+    tradeCompeleted?: boolean;
+}
+
+export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeCompeleted }: Props) {
     const [item, setItem] = useState({ itemName: "", amount: 0 });
     const [onOwnerAddressStatus, setOnOwnerAddressStatus] = useState(false);
+    const [onSellerAddress, setOnSellerAddress]: any = useState("");
+    const [onBuyerAccept, setOnBuyerAccept] = useState<boolean | undefined>(false);
+    const [onDepositMade, setOnDepositMade] = useState<boolean | undefined>(false);
+    const [onTradeComplete, setOnTradeComplete] = useState<boolean | undefined>(false)
     const [account, setAccount] = useState(null);
-    const [onStatusBuy, setOnStatusBuy] = useState(false);
+
     const web3: any = new Web3(window.ethereum);
     const contractAddress = process.env.NEXT_PUBLIC_SC_ADDRESS;
     const contract = new web3.eth.Contract(contractABI, contractAddress)
-    let accounts;
+    let accounts: any;
     let userAddress: any;
 
     useEffect(() => {
-
-        const getAddressOwner = async () => {
-            accounts = await web3.eth.getAccounts();
-            userAddress = accounts[0];
-            const checkIfTheOwner = await contract.methods?.getAddressOwner(userAddress).call();
-
-            try {
-                setOnOwnerAddressStatus(checkIfTheOwner)
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
         const fetchAccount = async () => {
             try {
+
                 accounts = await web3.eth.getAccounts();
                 userAddress = accounts[0];
                 setAccount(userAddress);
+                setOnSellerAddress(sellerAddress)
+                setOnBuyerAccept(buyerAccepted)
+                setOnDepositMade(depositMade);
+                setOnTradeComplete(tradeCompeleted);
 
                 window.ethereum.on('accountsChanged', async (accounts: any) => {
                     accounts = await web3.eth.getAccounts();
                     userAddress = accounts[0];
                     setAccount(userAddress);
-                    getAddressOwner().catch(console.error);
-
+                    setOnSellerAddress(sellerAddress)
+                    setOnBuyerAccept(buyerAccepted)
+                    setOnDepositMade(depositMade);
+                    setOnTradeComplete(tradeCompeleted);
                 })
 
                 window.ethereum.on('disconnect', () => {
                     console.log('disconnect');
                     setAccount(null);
-                    setOnOwnerAddressStatus(false);
                 })
             } catch (error) {
                 console.log(error)
             }
         }
 
-        fetchAccount().catch(console.error);
+        fetchAccount()
     }, [])
 
-    const onWantToBuy = async () => {
+    const acceptTrade = async () => {
         const accounts = await web3.eth.getAccounts();
-        console.log(accounts[0])
         try {
-            await contract.methods.iWantToBuy("cars", 100000000000000).send({ from: accounts[0] });
-            setOnStatusBuy(true)
-            setItem({ itemName: "cars", amount: 0.0001 });
+            await contract.methods.acceptTradeAsBuyer().send({ from: accounts[0] })
+            setOnBuyerAccept(buyerAccepted)
         } catch (err) {
-            console.log("error", err)
+            console.log("Error", err)
         }
-
     }
 
     const onDeposit = async () => {
         const accounts = await web3.eth.getAccounts();
         try {
             await contract.methods.deposit().send({ from: accounts[0] });
+            setOnDepositMade(depositMade);
         } catch (err) {
-            console.log("error", err)
+            console.log("Error", err)
+        }
+    }
+
+    const onSellerAcceptTrade = async () => {
+        const accounts = await web3.eth.getAccounts();
+
+        try {
+            await contract.methods.acceptTradeAsSeller().send({ from: accounts[0] });
+            setOnTradeComplete(tradeCompeleted)
+        } catch (err) {
+            console.log("Error", err)
         }
     }
 
@@ -100,28 +113,29 @@ export default function Item() {
                         width="100%"
                     />
                     <CardBody>
+                        <CardText>Price: <b>0.0001</b> ETH</CardText>
                         <CardText>
                             The best lamborghini and speedy car in the universe
                         </CardText>
                         {
-                            onStatusBuy ?
+                            onTradeComplete ? <>
+                                <Button color="success">The Trade Has Completed</Button>
+                            </> : onBuyerAccept ?
                                 <>
                                     <FormGroup className="row">
-                                        <Col md={9}>
-                                            <Input type="number" value={item.amount} />
-                                        </Col>
-                                        <Col md={3}>
-                                            <Button onClick={onDeposit}>Deposit</Button>
+                                        <Col md={12}>
+                                            {onDepositMade ? <Button color="warning">Deposit has been made</Button> : <Button onClick={onDeposit}>Pay for it</Button>}
                                         </Col>
                                     </FormGroup>
                                 </>
                                 :
                                 <>
-                                    <Button color="primary" onClick={onWantToBuy}>
-                                        Trade
+                                    <Button color="primary" onClick={acceptTrade}>
+                                        Accept The Trade
                                     </Button>
                                 </>
                         }
+
 
                     </CardBody>
                 </Card>
@@ -129,20 +143,19 @@ export default function Item() {
         )
     }
 
-    const RenderSeller = () => {
+    function SellerScreen() {
         return (
             <>
-                <h3>Seller</h3>
-                <p>Seller Address: {userAddress}</p>
+                <h4>Seller Accept Trade</h4>
                 <hr />
-                <Button>Accept Trade</Button>
+                {onDepositMade ? tradeCompeleted ? <><Button color="success" >The Trade Has Completed</Button></> : <><Button color="primary" onClick={onSellerAcceptTrade}>Accept</Button></> : <Button color="warning">The deposit hasn't made yet!</Button>}
             </>
-        );
+        )
     }
-    console.log("onOwnerAddressStatus", onOwnerAddressStatus)
+
     return (
         <>
-            {onOwnerAddressStatus ? <RenderSeller /> : <RenderLimbo />}
+            {account === onSellerAddress ? <Col md={6}><SellerScreen /></Col> : <Col md={4}><RenderLimbo /></Col>}
         </>
     )
 }

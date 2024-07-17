@@ -1,6 +1,22 @@
 [
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_buyerAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "_item",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_price",
+                "type": "uint256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "constructor"
     },
@@ -10,7 +26,7 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "buyer",
+                "name": "buyerAddress",
                 "type": "address"
             }
         ],
@@ -23,7 +39,7 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "seller",
+                "name": "sellerAddress",
                 "type": "address"
             }
         ],
@@ -36,13 +52,13 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "seller",
+                "name": "sellerAddress",
                 "type": "address"
             },
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "buyer",
+                "name": "buyerAddress",
                 "type": "address"
             }
         ],
@@ -55,19 +71,19 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "seller",
+                "name": "sellerAddress",
                 "type": "address"
             },
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "buyer",
+                "name": "buyerAddress",
                 "type": "address"
             },
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "amount",
+                "name": "price",
                 "type": "uint256"
             },
             {
@@ -82,35 +98,16 @@
     },
     {
         "inputs": [],
-        "name": "acceptTradeAsSeller",
+        "name": "acceptTradeAsBuyer",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
         "inputs": [],
-        "name": "amount",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "buyer",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
+        "name": "acceptTradeAsSeller",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -128,25 +125,12 @@
     },
     {
         "inputs": [],
-        "name": "deposit",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_userAddress",
-                "type": "address"
-            }
-        ],
-        "name": "getAddressOwner",
+        "name": "buyerAddress",
         "outputs": [
             {
-                "internalType": "bool",
+                "internalType": "address",
                 "name": "",
-                "type": "bool"
+                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -154,7 +138,14 @@
     },
     {
         "inputs": [],
-        "name": "getTradeStatus",
+        "name": "deposit",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "depositMade",
         "outputs": [
             {
                 "internalType": "bool",
@@ -163,24 +154,6 @@
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "_item",
-                "type": "string"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "iWantToBuy",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -198,25 +171,12 @@
     },
     {
         "inputs": [],
-        "name": "owner",
+        "name": "price",
         "outputs": [
             {
-                "internalType": "address",
+                "internalType": "uint256",
                 "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "seller",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -230,6 +190,19 @@
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "sellerAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ],
         "stateMutability": "view",

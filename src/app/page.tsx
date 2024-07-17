@@ -1,14 +1,14 @@
 import { Col, Container, Row } from "reactstrap";
 import Item from "./components/Item";
+import { getData } from "./data/getData";
 
-export default function Home() {
+export default async function Home() {
+  const { sellerAddress, buyerAccepted, depositMade, tradeCompeleted }: any = await getData();
   return (
     <>
       <Container>
         <Row className="mt-4">
-          <Col md={4}>
-            <Item />
-          </Col>
+          <Item sellerAddress={sellerAddress} buyerAccepted={buyerAccepted} depositMade={depositMade} tradeCompeleted={tradeCompeleted} />
         </Row>
       </Container>
     </>
