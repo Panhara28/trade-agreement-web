@@ -21,53 +21,60 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
     const [onTradeComplete, setOnTradeComplete] = useState<boolean | undefined>(false)
     const [account, setAccount] = useState(null);
 
-    const web3: any = new Web3(window.ethereum);
-    const contractAddress = process.env.NEXT_PUBLIC_SC_ADDRESS;
-    const contract = new web3.eth.Contract(contractABI, contractAddress)
+    let web3: any;
+    let contract: any;
+
+    if (typeof window !== 'undefined') {
+        web3 = new Web3(window.ethereum);
+        const contractAddress = process.env.NEXT_PUBLIC_SC_ADDRESS;
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+    }
+
     let accounts: any;
     let userAddress: any;
 
     useEffect(() => {
         const fetchAccount = async () => {
-            try {
-
-                accounts = await web3.eth.getAccounts();
-                userAddress = accounts[0];
-                setAccount(userAddress);
-                setOnSellerAddress(sellerAddress)
-                setOnBuyerAccept(buyerAccepted)
-                setOnDepositMade(depositMade);
-                setOnTradeComplete(tradeCompeleted);
-
-                window.ethereum.on('accountsChanged', async (accounts: any) => {
+            if (typeof window !== 'undefined') {
+                try {
                     accounts = await web3.eth.getAccounts();
                     userAddress = accounts[0];
                     setAccount(userAddress);
-                    setOnSellerAddress(sellerAddress)
-                    setOnBuyerAccept(buyerAccepted)
+                    setOnSellerAddress(sellerAddress);
+                    setOnBuyerAccept(buyerAccepted);
                     setOnDepositMade(depositMade);
                     setOnTradeComplete(tradeCompeleted);
-                })
 
-                window.ethereum.on('disconnect', () => {
-                    console.log('disconnect');
-                    setAccount(null);
-                })
-            } catch (error) {
-                console.log(error)
+                    window.ethereum.on('accountsChanged', async (accounts: any) => {
+                        accounts = await web3.eth.getAccounts();
+                        userAddress = accounts[0];
+                        setAccount(userAddress);
+                        setOnSellerAddress(sellerAddress);
+                        setOnBuyerAccept(buyerAccepted);
+                        setOnDepositMade(depositMade);
+                        setOnTradeComplete(tradeCompeleted);
+                    });
+
+                    window.ethereum.on('disconnect', () => {
+                        console.log('disconnect');
+                        setAccount(null);
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
             }
         }
 
-        fetchAccount()
-    }, [])
+        fetchAccount();
+    }, []);
 
     const acceptTrade = async () => {
         const accounts = await web3.eth.getAccounts();
         try {
-            await contract.methods.acceptTradeAsBuyer().send({ from: accounts[0] })
-            setOnBuyerAccept(buyerAccepted)
+            await contract.methods.acceptTradeAsBuyer().send({ from: accounts[0] });
+            setOnBuyerAccept(buyerAccepted);
         } catch (err) {
-            console.log("Error", err)
+            console.log("Error", err);
         }
     }
 
@@ -77,18 +84,17 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
             await contract.methods.deposit().send({ from: accounts[0], value: web3.utils.toWei('0.0001', 'ether') });
             setOnDepositMade(depositMade);
         } catch (err) {
-            console.log("Error", err)
+            console.log("Error", err);
         }
     }
 
     const onSellerAcceptTrade = async () => {
         const accounts = await web3.eth.getAccounts();
-
         try {
             await contract.methods.acceptTradeAsSeller().send({ from: accounts[0] });
-            setOnTradeComplete(tradeCompeleted)
+            setOnTradeComplete(tradeCompeleted);
         } catch (err) {
-            console.log("Error", err)
+            console.log("Error", err);
         }
     }
 
@@ -135,8 +141,6 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
                                     </Button>
                                 </>
                         }
-
-
                     </CardBody>
                 </Card>
             </>
@@ -148,7 +152,7 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
             <>
                 <h4>Seller Accept Trade</h4>
                 <hr />
-                {onDepositMade ? tradeCompeleted ? <><Button color="success" >The Trade Has Completed</Button></> : <><Button color="primary" onClick={onSellerAcceptTrade}>Accept</Button></> : <Button color="warning">The deposit hasn't made yet!</Button>}
+                {onDepositMade ? tradeCompeleted ? <><Button color="success" >The Trade Has Completed</Button></> : <><Button color="primary" onClick={onSellerAcceptTrade}>Accept</Button></> : <Button color="warning">The deposit hasn`t made yet!</Button>}
             </>
         )
     }
