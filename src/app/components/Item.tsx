@@ -74,7 +74,7 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
     const onDeposit = async () => {
         const accounts = await web3.eth.getAccounts();
         try {
-            await contract.methods.deposit().send({ from: accounts[0] });
+            await contract.methods.deposit().send({ from: accounts[0], value: web3.utils.toWei('0.0001', 'ether') });
             setOnDepositMade(depositMade);
         } catch (err) {
             console.log("Error", err)
