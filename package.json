@@ -9,11 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@metamask/sdk-react": "^0.26.5",
+    "@metamask/sdk-react": "^0.14.1",
     "bootstrap": "^5.3.3",
     "bottleneck": "^2.19.5",
     "ethers": "^6.13.1",
     "next": "14.2.5",
+    "or": "^0.2.0",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.2.1",

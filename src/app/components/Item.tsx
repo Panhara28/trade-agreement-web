@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, CardBody, CardLink, CardSubtitle, CardText, CardTitle, Col, FormGroup, Input } from "reactstrap";
 import Web3 from "web3";
 import contractABI from '../abi/index.json';
+import { useSDK } from "@metamask/sdk-react";
 
 type Props = {
     sellerAddress?: string;
@@ -13,13 +14,14 @@ type Props = {
 }
 
 export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeCompeleted }: Props) {
+    const { sdk, connected, connecting, account } = useSDK();
+
     const [item, setItem] = useState({ itemName: "", amount: 0 });
     const [onOwnerAddressStatus, setOnOwnerAddressStatus] = useState(false);
     const [onSellerAddress, setOnSellerAddress]: any = useState("");
-    const [onBuyerAccept, setOnBuyerAccept] = useState<boolean | undefined>(false);
-    const [onDepositMade, setOnDepositMade] = useState<boolean | undefined>(false);
-    const [onTradeComplete, setOnTradeComplete] = useState<boolean | undefined>(false)
-    const [account, setAccount] = useState(null);
+    const [onBuyerAccept, setOnBuyerAccept] = useState<boolean | undefined>(buyerAccepted);
+    const [onDepositMade, setOnDepositMade] = useState<boolean | undefined>(depositMade);
+    const [onTradeComplete, setOnTradeComplete] = useState<boolean | undefined>(tradeCompeleted);
 
     let web3: any;
     let contract: any;
@@ -33,46 +35,41 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
     let accounts: any;
     let userAddress: any;
 
+    console.log("tradeCompeleted", tradeCompeleted);
+
     useEffect(() => {
         const fetchAccount = async () => {
-            if (typeof window !== 'undefined') {
-                try {
+
+            try {
+                accounts = await web3.eth.getAccounts();
+                userAddress = accounts[0];
+                setOnSellerAddress(sellerAddress);
+                setOnTradeComplete(tradeCompeleted);
+
+                window.ethereum.on('accountsChanged', async (accounts: any) => {
                     accounts = await web3.eth.getAccounts();
                     userAddress = accounts[0];
-                    setAccount(userAddress);
                     setOnSellerAddress(sellerAddress);
-                    setOnBuyerAccept(buyerAccepted);
-                    setOnDepositMade(depositMade);
                     setOnTradeComplete(tradeCompeleted);
+                });
 
-                    window.ethereum.on('accountsChanged', async (accounts: any) => {
-                        accounts = await web3.eth.getAccounts();
-                        userAddress = accounts[0];
-                        setAccount(userAddress);
-                        setOnSellerAddress(sellerAddress);
-                        setOnBuyerAccept(buyerAccepted);
-                        setOnDepositMade(depositMade);
-                        setOnTradeComplete(tradeCompeleted);
-                    });
-
-                    window.ethereum.on('disconnect', () => {
-                        console.log('disconnect');
-                        setAccount(null);
-                    });
-                } catch (error) {
-                    console.log(error);
-                }
+                window.ethereum.on('disconnect', () => {
+                    console.log('disconnect');
+                });
+            } catch (error) {
+                console.log(error);
             }
+
         }
 
         fetchAccount();
-    }, []);
+    }, [sellerAddress]);
 
     const acceptTrade = async () => {
         const accounts = await web3.eth.getAccounts();
         try {
             await contract.methods.acceptTradeAsBuyer().send({ from: accounts[0] });
-            setOnBuyerAccept(buyerAccepted);
+            setOnBuyerAccept(true); // Update the state variable here
         } catch (err) {
             console.log("Error", err);
         }
@@ -82,7 +79,7 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
         const accounts = await web3.eth.getAccounts();
         try {
             await contract.methods.deposit().send({ from: accounts[0], value: web3.utils.toWei('0.0001', 'ether') });
-            setOnDepositMade(depositMade);
+            setOnDepositMade(true); // Update the state variable here
         } catch (err) {
             console.log("Error", err);
         }
@@ -92,7 +89,7 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
         const accounts = await web3.eth.getAccounts();
         try {
             await contract.methods.acceptTradeAsSeller().send({ from: accounts[0] });
-            setOnTradeComplete(tradeCompeleted);
+            setOnTradeComplete(true); // Update the state variable here
         } catch (err) {
             console.log("Error", err);
         }
@@ -152,14 +149,14 @@ export default function Item({ sellerAddress, buyerAccepted, depositMade, tradeC
             <>
                 <h4>Seller Accept Trade</h4>
                 <hr />
-                {onDepositMade ? tradeCompeleted ? <><Button color="success" >The Trade Has Completed</Button></> : <><Button color="primary" onClick={onSellerAcceptTrade}>Accept</Button></> : <Button color="warning">The deposit hasn`t made yet!</Button>}
+                {onDepositMade ? onTradeComplete ? <><Button color="success" >The Trade Has Completed</Button></> : <><Button color="primary" onClick={onSellerAcceptTrade}>Accept</Button></> : <Button color="warning">The deposit hasn`t made yet!</Button>}
             </>
         )
     }
 
     return (
         <>
-            {account === onSellerAddress ? <Col md={6}><SellerScreen /></Col> : <Col md={4}><RenderLimbo /></Col>}
+            {account?.toLocaleLowerCase() === onSellerAddress.toLocaleLowerCase() ? <Col md={6}><SellerScreen /></Col> : <Col md={4}><RenderLimbo /></Col>}
         </>
     )
 }
