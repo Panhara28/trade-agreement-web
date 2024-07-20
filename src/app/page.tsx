@@ -4,6 +4,7 @@ import { getData } from "./data/getData";
 
 export default async function Home() {
   const { sellerAddress, buyerAccepted, depositMade, tradeCompeleted }: any = await getData();
+  console.log("tradeCompeleted", tradeCompeleted)
   return (
     <>
       <Container>
